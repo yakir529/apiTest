@@ -19,7 +19,7 @@ $(function(){
                 }
             }
 
-            $(".rawDataContainer").append(v_html);
+            $(".rawDataContainer").html("").append(v_html);
         });
     });
 });

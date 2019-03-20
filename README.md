@@ -1,6 +1,8 @@
 # apiTest
 just a test
 
+---> assumption: user is friendly
+
 ---> no prerequisites are required. it is a pure front end job within the browser.
 
 to run the test:

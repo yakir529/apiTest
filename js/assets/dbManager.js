@@ -6,19 +6,25 @@ AssetsLib.DBManager = (function(){
     var m_instance,
         DBHandler = (function(){
             var m_db = null,
-                c_insertDataToTableCommandTemplate = "DELETE FROM {0} INSERT INTO {0} ({1}) VALUES {2}",
+                c_insertDataToTableCommandTemplate = "INSERT INTO {0} ({1}) VALUES {2}",
+                c_clearTableTemplate = "DELETE FROM {0}",
                 c_createTableCommandTemplate = "CREATE TABLE IF NOT EXISTS {0} (ID unique, {1})",
                 c_dataTableColumnsTemplate = "Word, Score, Tags",
                 c_tagsFieldSlugMarker = "&",
                 c_getReportCommandTemplate = "SELECT * FROM {0} {1} ",
-                m_createdDataTablesNameLog = [];
+                m_createdDataTablesNameLog = {},
+                m_currTableName = null;
 
             function DBHandler(){
                 m_db = openDatabase("wordsStore", "1.0", "db for words from api", 2 * 1024 * 1024);
             }
 
-            DBHandler.prototype.SetKeywords = function(i_keywordsArr){
-                m_createdDataTablesNameLog = i_keywordsArr;
+            DBHandler.prototype.SetKeywords = function(i_keywords){
+                m_createdDataTablesNameLog = i_keywords;
+            }
+
+            DBHandler.prototype.SetCurrTableName = function(i_TableName){
+                m_currTableName = i_TableName;
             }
 
             DBHandler.prototype.CreateDataTable = function(i_tableName){
@@ -33,10 +39,13 @@ AssetsLib.DBManager = (function(){
 
             DBHandler.prototype.InsertDataToLastCreatedTable = function(i_data){
                 return new Promise(function (resolve) {
-                    var _insertDataToTableCommand = getInsertToTableCommand(m_createdDataTablesNameLog[m_createdDataTablesNameLog.length - 1], c_dataTableColumnsTemplate, getAggregateData(i_data));
+                    var _insertDataToTableCommand = getInsertToTableCommand(m_createdDataTablesNameLog[m_currTableName], c_dataTableColumnsTemplate, getAggregateData(i_data)),
+                        _clearTableCommand = c_clearTableTemplate.Format([m_currTableName]);
                     m_db.transaction(function (tx) {
-                        tx.executeSql(_insertDataToTableCommand);
-                        resolve();
+                        tx.executeSql(_clearTableCommand, [], function(tx, i_data){
+                            tx.executeSql(_insertDataToTableCommand);
+                            resolve();
+                        });
                     });
                 });
             }
@@ -62,11 +71,12 @@ AssetsLib.DBManager = (function(){
 
             function getReportCommand(){
                 var o_response = "SELECT Tags, COUNT(*) AS 'num' FROM (",
+                    _keys = Object.keys(m_createdDataTablesNameLog),
                     v_union = "UNION";
 
-                for (var k=0; k<m_createdDataTablesNameLog.length; k++) {
-                    if (k == m_createdDataTablesNameLog.length - 1) v_union = ") GROUP BY Tags";
-                    o_response += c_getReportCommandTemplate.Format([m_createdDataTablesNameLog[k], v_union]);
+                for (var k=0; k<_keys.length; k++) {
+                    if (k == _keys.length - 1) v_union = ") GROUP BY Tags";
+                    o_response += c_getReportCommandTemplate.Format([m_createdDataTablesNameLog[_keys[k]], v_union]);
                 }
 
                 return o_response;

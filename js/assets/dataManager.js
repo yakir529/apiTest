@@ -18,20 +18,22 @@ AssetsLib.DataManager = (function(){
                 m_apiPath = "https://api.datamuse.com/words?ml={0}";
                 m_settings = {
                     rawDataContainerSelector: ".rawDataContainer",
-                    keyWords: ["affiliate","marketing","influencer"]
+                    keyWords: {"affiliate": "affiliate","marketing": "marketing","influencer": "influencer"}
                 };
             }
 
             DataHandler.prototype.FetchDataToDB = function(){
                 m_loaderManager.ShowLoader();
-                var _promise = $.when();
+                var _promise = $.when(),
+                    _keys = Object.keys(m_settings.keyWords);
                 m_dbManager.SetKeywords(m_settings.keyWords);
-                m_settings.keyWords.forEach(function(word){
+                _keys.forEach(function(word){
                     _promise = _promise
                     .then(function(){
                         return m_dbManager.CreateDataTable(word);
                     })
                     .then(function(){
+                        m_dbManager.SetCurrTableName(word);
                         return callToAPI(word, m_dbManager.InsertDataToLastCreatedTable);
                     });
                 });

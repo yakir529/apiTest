@@ -5,15 +5,17 @@ var AssetsLib = AssetsLib || {};
 AssetsLib.LoaderManager = (function(){
     var m_instance,
         LoaderHandler = (function(){
+            var m_containerSelector = ".loaderContainer";
+
             function LoaderHandler()
             { }
 
             LoaderHandler.prototype.ShowLoader = function(){
-                
+                $(m_containerSelector).css("visibility", "visible");
             }
 
             LoaderHandler.prototype.HideLoader = function(){
-                console.log(1);
+                $(m_containerSelector).css("visibility", "hidden");
             }
 
             return LoaderHandler;
