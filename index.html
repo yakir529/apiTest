@@ -6,14 +6,16 @@
     <title>api integration test</title>
     <link rel="stylesheet" href="css/style.css">
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript" src="js/aid/polyfills.js"></script>
     <script type="text/javascript" src="js/assets/dbManager.js"></script>
+    <script type="text/javascript" src="js/assets/chartManager.js"></script>
     <script type="text/javascript" src="js/assets/loaderManager.js"></script>
     <script type="text/javascript" src="js/assets/dataManager.js"></script>
     <script type="text/javascript" src="js/eventsHandler.js"></script>
 </head>
 <body>
-    <div class="loaderContainer">
+    <div class="loader-container">
         <div class="lds-dual-ring"></div>
     </div>
     <main class="content">
@@ -21,8 +23,9 @@
             <button class="js_fetchData">fetch words</button>
             <button class="js_showReport">show-report</button>
         </div>
-        <div class="data_pan">
-            <div class="rawDataContainer"></div>
+        <div class="data-pan">
+            <div class="raw-data-container"></div>
+            <div class="graph-container"></div>
         </div>
     </main>
 </body>

@@ -5,7 +5,7 @@ var AssetsLib = AssetsLib || {};
 AssetsLib.LoaderManager = (function(){
     var m_instance,
         LoaderHandler = (function(){
-            var m_containerSelector = ".loaderContainer";
+            var m_containerSelector = ".loader-container";
 
             function LoaderHandler()
             { }

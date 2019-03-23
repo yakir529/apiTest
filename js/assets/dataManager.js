@@ -5,8 +5,7 @@ var AssetsLib = AssetsLib || {};
 AssetsLib.DataManager = (function(){
     var m_instance,
         DataHandler = (function(){
-            var c_badSettingsMSG = "Bad settings were submited",
-                m_apiPath = null,
+            var m_apiPath = null,
                 m_dbManager = null,
                 m_loaderManager = null,
                 m_settings = null;
@@ -15,9 +14,9 @@ AssetsLib.DataManager = (function(){
             {
                 m_dbManager = AssetsLib.DBManager.GetInstance();
                 m_loaderManager = AssetsLib.LoaderManager.GetInstance();
+                m_gchartManager = AssetsLib.ChartManager.GetInstance();
                 m_apiPath = "https://api.datamuse.com/words?ml={0}";
                 m_settings = {
-                    rawDataContainerSelector: ".rawDataContainer",
                     keyWords: {"affiliate": "affiliate","marketing": "marketing","influencer": "influencer"}
                 };
             }
@@ -26,11 +25,14 @@ AssetsLib.DataManager = (function(){
                 m_loaderManager.ShowLoader();
                 var _promise = $.when(),
                     _keys = Object.keys(m_settings.keyWords);
-                m_dbManager.SetKeywords(m_settings.keyWords);
+
+                _promise = _promise.then(function(){
+                    return m_dbManager.CreateDataTable("Tags", "WordTableId, WordTableName, TagSlug", true);
+                });
                 _keys.forEach(function(word){
                     _promise = _promise
                     .then(function(){
-                        return m_dbManager.CreateDataTable(word);
+                        return m_dbManager.CreateDataTable(word, "Word, Score", false);
                     })
                     .then(function(){
                         m_dbManager.SetCurrTableName(word);
@@ -41,10 +43,18 @@ AssetsLib.DataManager = (function(){
                 return _promise;
             }
 
-            DataHandler.prototype.GenerateReportFromDB = function(i_uniqueContainerSelector, i_callback){
+            DataHandler.prototype.GenerateReportFromDB = function(){
                 m_loaderManager.ShowLoader();
                 var _promise = $.when();
                 _promise = _promise.then(m_dbManager.GetReport);
+                _promise = _promise.always(m_loaderManager.HideLoader);
+                return _promise;
+            }
+
+            DataHandler.prototype.CreateGraph = function(i_dataArr, i_options, i_uniqueSelector){
+                m_loaderManager.ShowLoader();
+                var _promise = $.when();
+                _promise = _promise.then(m_gchartManager.DrawChart(i_dataArr, i_options, i_uniqueSelector));
                 _promise = _promise.always(m_loaderManager.HideLoader);
                 return _promise;
             }
